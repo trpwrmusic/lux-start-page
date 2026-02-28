@@ -1979,13 +1979,24 @@
                 }, 200);
             });
 
+            // Store original typed text for arrow key navigation
+            let originalSearchValue = '';
+
             searchInput.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowDown') {
                     e.preventDefault();
+                    // Store original value before first navigation
+                    if (currentSuggestionIndex === -1) {
+                        originalSearchValue = searchInput.value;
+                    }
                     currentSuggestionIndex = Math.min(
                         currentSuggestionIndex + 1,
                         suggestions.length - 1
                     );
+                    // Update input with selected suggestion text
+                    if (currentSuggestionIndex >= 0 && suggestions[currentSuggestionIndex]) {
+                        searchInput.value = suggestions[currentSuggestionIndex].text;
+                    }
                     renderSuggestions();
                 } else if (e.key === 'ArrowUp') {
                     e.preventDefault();
@@ -1993,6 +2004,12 @@
                         currentSuggestionIndex - 1,
                         -1
                     );
+                    // Update input: restore original text if at -1, otherwise use suggestion
+                    if (currentSuggestionIndex === -1) {
+                        searchInput.value = originalSearchValue;
+                    } else if (suggestions[currentSuggestionIndex]) {
+                        searchInput.value = suggestions[currentSuggestionIndex].text;
+                    }
                     renderSuggestions();
                 } else if (e.key === 'Enter' && currentSuggestionIndex >= 0) {
                     e.preventDefault();
