@@ -2019,10 +2019,62 @@
                 }
             });
 
+            // Check if input is a domain (e.g., "claude.com", "google.de")
+            function isDomain(input) {
+                // Remove common prefixes
+                const cleaned = input.toLowerCase().trim();
+                
+                // Must contain a dot and no spaces
+                if (!cleaned.includes('.') || cleaned.includes(' ')) {
+                    return false;
+                }
+                
+                // Check if it looks like a domain (not a search query)
+                // Domains typically: no special chars except . and -, no path separators
+                if (/[<>{}|\\^~[\]]/.test(cleaned)) {
+                    return false;
+                }
+                
+                // Check if it's a URL pattern (has protocol or www)
+                if (/^(https?:\/\/|www\.)/i.test(cleaned)) {
+                    return true;
+                }
+                
+                // Check if it matches domain pattern (word.word)
+                const domainPattern = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+                if (domainPattern.test(cleaned)) {
+                    return true;
+                }
+                
+                return false;
+            }
+            
+            // Normalize domain URL
+            function normalizeDomain(input) {
+                let domain = input.toLowerCase().trim();
+                
+                // Remove protocol if present
+                domain = domain.replace(/^(https?:\/\/)?/, '');
+                
+                // Remove www. if present (we'll add it back for consistency)
+                domain = domain.replace(/^www\./, '');
+                
+                // Add protocol
+                return 'https://' + domain;
+            }
+
             searchForm.addEventListener('submit', (e) => {
                 const query = searchInput.value.trim();
                 if (query) {
-                    addToHistory(query);
+                    // Check if it's a domain
+                    if (isDomain(query)) {
+                        e.preventDefault();
+                        const url = normalizeDomain(query);
+                        addToHistory(query);
+                        window.location.href = url;
+                    } else {
+                        addToHistory(query);
+                    }
                 }
             });
 
