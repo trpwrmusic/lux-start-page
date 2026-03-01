@@ -1919,10 +1919,20 @@
 
             function selectSuggestion(index) {
                 if (index >= 0 && index < suggestions.length) {
+                    const selectedText = suggestions[index].text;
                     const input = document.getElementById('search-input');
-                    input.value = suggestions[index].text;
+                    input.value = selectedText;
                     hideAutocomplete();
-                    document.getElementById('search-form').submit();
+                    
+                    // Check if it's a domain - if so, open directly
+                    if (isDomain(selectedText)) {
+                        const url = normalizeDomain(selectedText);
+                        addToHistory(selectedText);
+                        window.location.href = url;
+                    } else {
+                        // Otherwise submit to Google
+                        document.getElementById('search-form').submit();
+                    }
                 }
             }
 
